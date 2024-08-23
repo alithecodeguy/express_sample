@@ -1,0 +1,49 @@
+import express from "express";
+import mysql from "mysql2/promise";
+
+const app = express();
+const port = process.env.PORT;
+
+// MySQL database connection configuration
+const connection = mysql.createPool({
+  host: "127.0.0.1",
+  user: "ali",
+  password: "917925481",
+  database: "kitchen",
+});
+
+// GET endpoint to retrieve data from the database
+app.get("/", async (req, res) => {
+  try {
+    // SQL query to retrieve data
+    const [rows] = await connection.execute(
+      "SELECT * FROM menu WHERE price > 150000"
+    );
+
+    // Send the results as a JSON response
+    res.json(rows);
+  } catch (error) {
+    console.error("Error retrieving data:", error);
+    res.status(500).send("Error retrieving data");
+  }
+});
+
+app.get("/item-price/:id", async (req, res) => {
+  //   console.log(req.params.id);
+  try {
+    // SQL query to retrieve data
+    const [rows] = await connection.execute("SELECT * FROM menu");
+    const price = rows.find((item) => item.menuId == req.params.id).price;
+    // Send the results as a JSON response
+    res.send(price);
+  } catch (error) {
+    console.error("Error retrieving data:", error);
+    res.status(500).send("Error retrieving data");
+  }
+  res.end();
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/`);
+});
